@@ -51,7 +51,7 @@ class SRProcessor:
         _, _, h, w = out_mat.shape
 
         out_mat = out_mat[:, :, 0 : h - mod_pad_h * self.current_model_scale, 0 : w - mod_pad_w * self.current_model_scale]
-        out_mat = np.squeeze(out_mat,0)
+        out_mat = np.squeeze(out_mat, 0)
         out_mat = np.transpose(out_mat, (1, 2, 0))
         out_mat = out_mat * 255.0
     

@@ -1,3 +1,6 @@
+'''
+Python script that defines the 3-way toggle switch to toggle between defalut video, another media, and default image.
+'''
 from PySide6.QtCore import (
     Qt, QSize, QPoint, QPointF, QRectF, Signal,
     QEasingCurve, QPropertyAnimation, QSequentialAnimationGroup,
@@ -5,17 +8,6 @@ from PySide6.QtCore import (
 
 from PySide6.QtWidgets import QCheckBox, QWidget, QLabel, QHBoxLayout
 from PySide6.QtGui import QColor, QBrush, QPaintEvent, QPen, QPainter
-
-
-from PySide6.QtCore import (
-    Qt, QSize, QPoint, QPointF, QRectF,
-    QEasingCurve, QPropertyAnimation, QSequentialAnimationGroup,
-    Slot, Property, Signal
-)
-from PySide6.QtWidgets import QCheckBox
-from PySide6.QtGui import QColor, QBrush, QPaintEvent, QPen, QPainter
-
-
 
 class AnimatedToggle(QCheckBox):
 
@@ -25,14 +17,9 @@ class AnimatedToggle(QCheckBox):
     _transparent_pen = QPen(Qt.transparent)
     _light_grey_pen = QPen(Qt.lightGray)
 
-    def __init__(self,
-        parent=None,
-        bar_color=Qt.gray,
-        checked_color="#00B0FF",
-        handle_color=Qt.white,
-        pulse_unchecked_color="#44999999",
-        pulse_checked_color="#4400B0EE"
-        ):
+    def __init__(self, parent = None, bar_color = Qt.gray,
+        checked_color = "#00B0FF", handle_color = Qt.white,
+        pulse_unchecked_color = "#44999999", pulse_checked_color = "#4400B0EE"):
         super().__init__(parent)
 
         # Save our properties on the object via self, so we can access them later

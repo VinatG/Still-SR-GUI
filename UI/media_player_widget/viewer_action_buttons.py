@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
-    QGraphicsScene, QVBoxLayout, QWidget, QPushButton, QFileDialog, QGraphicsPixmapItem,
-    QLabel, QHBoxLayout, QCheckBox
+    QPushButton, QHBoxLayout, QCheckBox
 )
+from UI.media_player_widget.post_processing_drop_down import PostProcessingDropdown
 from UI.media_player_widget.toggle_switch import ToggleSwitchWidget
 from UI import icon_button
 from utils import globals
@@ -20,11 +20,8 @@ class ViewerButtons(QHBoxLayout):
         self.play_button.clicked.connect(self.parent.play_video) 
         self.pause_button.clicked.connect(self.parent.pause_video) 
 
-        self.pre_processing_button = QPushButton("Pre-process")
-        self.pre_processing_button.setCheckable(True)
-        self.pre_processing_button.setStyleSheet(globals.pre_processing_button_style)
-        self.pre_processing_button.setMinimumWidth(250)
-        self.pre_processing_button.toggled.connect(self.pre_processing_button_toggle)
+        self.post_processing_drop_down = PostProcessingDropdown()#self)
+        self.post_processing_drop_down.valueChanged.connect(self.set_post_processing_algorithm)
 
         self.default_media_toggle_button = ToggleSwitchWidget()
         self.default_media_toggle_button.toggle_slider.positionChanged.connect(self.on_slider_changed)
@@ -34,10 +31,11 @@ class ViewerButtons(QHBoxLayout):
         self.addWidget(self.play_button)
         self.addWidget(self.pause_button)
         self.addStretch(3)
-        self.addWidget(self.pre_processing_button)
+        self.addWidget(self.post_processing_drop_down)
         self.addStretch(2)
         self.addWidget(self.default_media_toggle_button)
         self.addStretch(2)
+
 
     def check_ocr_state(self, state):
         if state == 2:  # 2 means checked
@@ -49,21 +47,11 @@ class ViewerButtons(QHBoxLayout):
             self.parent.set_crop()
             self.parent.run_still_execution()
     
-
-
-    
-
-    def pre_processing_button_toggle(self, state : bool):
-        self.parent.do_pre_processing = state
-        if state:
-            self.pre_processing_button.setText("No Pre-processing")
-        else:
-            self.pre_processing_button.setText("Pre-processing")
-        
+    def set_post_processing_algorithm(self, alg : str):
+        self.parent.post_processing_algorithm = alg
         if self.parent.isMediaImage:
             self.parent.set_crop()
-            self.parent.run_still_execution()
-    
+            self.parent.run_still_execution() 
         
     def on_slider_changed(self, pos):
         if pos == 0:

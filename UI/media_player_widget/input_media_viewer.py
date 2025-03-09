@@ -9,14 +9,12 @@ from PySide6.QtGui import QWheelEvent, QPainter, QMouseEvent, QPen, QColor, QDra
 from PySide6.QtCore import Qt, QRect, QUrl
 from utils.utils import resource_path
 
-
 class InputMediaViewer(QGraphicsView):
-    def __init__(self, scene, parent=None):
+    def __init__(self, scene, parent = None):
         super().__init__(scene, parent)
         
         self.setMouseTracking(True)
         self.setAcceptDrops(True)
-
         self.setRenderHint(QPainter.Antialiasing)
         self.setTransformationAnchor(QGraphicsView.NoAnchor)
         self.zoom_factor = 1.0
@@ -25,12 +23,14 @@ class InputMediaViewer(QGraphicsView):
         # Set scroll bars to show only when necessary
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+
     def dragEnterEvent(self, event: QDragEnterEvent):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
 
     def dragMoveEvent(self, event: QDragEnterEvent):
         event.acceptProposedAction()
+
     def dropEvent(self, event: QDropEvent):
         urls = event.mimeData().urls()
         if urls:
@@ -76,17 +76,15 @@ class InputMediaViewer(QGraphicsView):
         
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        # Center the view when the window is resized
-        #self.center_if_needed()
+
     def center_if_needed(self):
-        if True: #self.horizontalScrollBar().isVisible() or self.verticalScrollBar().isVisible():
+        if True: 
             self.centerOn(self.scene().sceneRect().center())
         
     def mousePressEvent(self, event: QMouseEvent):    
         scene_pos = self.mapToScene(event.pos())
         relative_pos = event.position().toPoint()
         self.main_window.update_crop_coordinates(scene_pos, relative_pos)        
-
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QMouseEvent):
@@ -97,7 +95,7 @@ class InputMediaViewer(QGraphicsView):
     def paintEvent(self, event):
         super().paintEvent(event)
         try: 
-            if self._mouse_pos:# and self.image_item:
+            if self._mouse_pos:
                 painter = QPainter(self.viewport())
                 red_pen = QPen(QColor(255, 0, 0))  # Red color for the square
                 red_pen.setStyle(Qt.DotLine)  # Dotted line style
@@ -126,4 +124,3 @@ class InputMediaViewer(QGraphicsView):
     def leaveEvent(self, event):
         self.viewport().setCursor(Qt.ArrowCursor)
         super().leaveEvent(event)
-

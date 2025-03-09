@@ -2,22 +2,19 @@ import os
 import sys
 import cv2
 import numpy as np
-from utils.preprocessings import histogram_equalize_image
 # PyInstaller creates a temp folder and stores path in _MEIPASS
 def resource_path(relative_path):
-    try:
-        
+    try:        
         base_path = sys._MEIPASS2
     except Exception:
         base_path = os.path.abspath(".")
-
     return os.path.join(base_path, relative_path)
 
 #Function to return the model path using the model name
 def model_path(name):
     return resource_path('ONNX_models\\new_'+name.lower()+'.onnx')
 
-#Util scripts to be used in VPW
+# Util scripts to be used in VPW
 def scale_to_fit_canvas(image, canvas_width, canvas_height):
     image_height, image_width, _ = image.shape
     image_aspect_ratio = image_width / image_height
@@ -30,8 +27,7 @@ def scale_to_fit_canvas(image, canvas_width, canvas_height):
         
     scaled_w = image_width * scaling_factor
     scaled_h = image_height * scaling_factor
-    
-    array = cv2.resize(image, (int(scaled_w), int(scaled_h)), interpolation=cv2.INTER_LINEAR)
+    array = cv2.resize(image, (int(scaled_w), int(scaled_h)), interpolation = cv2.INTER_LINEAR)
     
     return array
 
@@ -40,11 +36,7 @@ def calculate_video_position(widget_width, widget_height, video_width, video_hei
     top_left_x = (widget_width - video_width) // 2
     top_left_y = (widget_height - video_height) // 2
 
-    return top_left_x, top_left_y
-
-def perform_pre_processing(input_array):
-    return histogram_equalize_image(input_array)
-    
+    return top_left_x, top_left_y    
     
 def generate_cropped_image(array, center_x, center_y):
     h, w, _ = array.shape

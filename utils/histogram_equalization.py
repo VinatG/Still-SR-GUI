@@ -1,8 +1,9 @@
-# histogram_equalize_image is the main function to which the input image is passed
-
+'''
+Histogram_equalize_image is the main function to which the input image is passed
+The inspiration is from the ImageJ implementation of the algorithm.
+'''
 import numpy as np
 import math
-
 
 def calculate_histogram(image):
     # Convert the image to grayscale using equal weights for R, G, B channels
@@ -31,9 +32,7 @@ def histogram_equalize_image(image):
 
     # lut -> Look up table
     lut = [0] * (range_variable + 1)
-
     lut[0] = 0
-
     sum = get_weighted_value(histogram, 0)
 
     for i in range(1, max):

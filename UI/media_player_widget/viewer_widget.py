@@ -1,7 +1,7 @@
 import cv2
 from PySide6.QtWidgets import (
-    QGraphicsScene, QVBoxLayout, QWidget, QPushButton, QFileDialog, QGraphicsPixmapItem,
-    QLabel, QHBoxLayout, QCheckBox
+    QGraphicsScene, QVBoxLayout, QWidget, QFileDialog, QGraphicsPixmapItem,
+    QLabel, QHBoxLayout
 )
 from PySide6.QtGui import QPixmap, QImage, QPainter
 from PySide6.QtCore import Qt, QThread, QUrl
@@ -9,10 +9,9 @@ from PySide6.QtCore import QRect, QPoint
 import numpy as np
 
 from UI.media_player_widget.input_media_viewer import InputMediaViewer
-from utils import utils, worker_classes, model_processors, globals
-from UI.media_player_widget.toggle_switch import ToggleSwitchWidget
+from utils import utils, worker_classes, model_processors
 from UI.media_player_widget.viewer_action_buttons import ViewerButtons
-#Main widget conisting of the 3 views and the 2 buttons
+from utils.image_processing import apply_post_processing
 import copy
 
 class MediaPlayerWidget(QWidget):
@@ -28,7 +27,7 @@ class MediaPlayerWidget(QWidget):
         self.video_w, self.video_h = None, None
         self.current_video_pixmap = None
         self.processed_frames_counter = 0
-        self.do_pre_processing = False
+        self.post_processing_algorithm = 'No Post-Processing'
         self.video_recording_images_list = []
         self.isRecordingOn = False
         self.isMediaVideo = False
@@ -98,6 +97,9 @@ class MediaPlayerWidget(QWidget):
     def set_output_label(self, out_mat):
         if self.do_ocr:
             out_mat = self.ocr_processor.perform_ocr(out_mat) 
+
+        
+        out_mat = apply_post_processing(out_mat, self.post_processing_algorithm)#perform_post_processing(out_mat)
         self.sr_result = out_mat
         height, width, _ = out_mat.shape
         bytes_per_line = 3 * width
@@ -109,10 +111,12 @@ class MediaPlayerWidget(QWidget):
 
     def play_video(self):
         if self.cap and self.cap.isOpened():
+            self.isMediaImage = False 
             self.isMediaVideo = True
             self.video_thread.start()
-            #self.timer.start(30) 
+
     def pause_video(self):
+        self.isMediaImage = True 
         self.isMediaVideo = False
         
     def load_video(self, url):
@@ -123,13 +127,12 @@ class MediaPlayerWidget(QWidget):
         self.video_thread.start()
 
     def setSource(self, url: QUrl, make_change = True):
-        if self.do_pre_processing:
-            self.buttons_layout.pre_processing_button.click() 
         if self.do_ocr:
             self.buttons_layout.ocr_checkbox.setChecked(False)
-        self.do_pre_processing, self.crop_center_x, self.crop_center_y = False, -1, -1
+        self.crop_center_x, self.crop_center_y = -1, -1
         self.pause_video()
         self.view.reset_to_default()
+        
         if make_change:
             self.buttons_layout.default_media_toggle_button.toggle_slider.setPosition(0.5)
         if QUrl.fileName(url).rsplit('.', 1)[1] in ['bmp', 'jpg', 'jpeg', 'png']:
@@ -281,17 +284,14 @@ class MediaPlayerWidget(QWidget):
         painter = QPainter(pixmap)
         self.view.render(painter, target=QRect(QPoint(0, 0), pixmap.size()), source=visible_rect)
         painter.end()
-        
-        #self.view.center_if_needed()
+
         image = self.QPixmapToArray(pixmap)
         cropped_image = image[y_start:y_end, x_start:x_end,  :]
         cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
         cropped_image = np.ascontiguousarray(cropped_image)
-        pixellated_image = np.repeat(np.repeat(cropped_image, 4, axis = 0), 4, axis = 1)     
-        if self.do_pre_processing:
-            cropped_image = utils.perform_pre_processing(cropped_image)
-
+        pixellated_image = np.repeat(np.repeat(cropped_image, 4, axis = 0), 4, axis = 1)  
         p_cropped_image = copy.deepcopy(cropped_image)
+
         if self.do_ocr:
             p_cropped_image = self.ocr_processor.perform_ocr(p_cropped_image)
 
@@ -367,15 +367,14 @@ class MediaPlayerWidget(QWidget):
         # Stop the current video stream
         if self.cap:
             self.cap.release()
-            #self.timer.stop()
      
         if selected_index == 0:
             # Reset for manual video selection
-            self.parent.select_media_button.setEnabled(True)
+            self.parent.media_buttons.select_media_button.setEnabled(True)
         # Get the selected source
         else:
             self.view.reset_to_default()
-            self.parent.select_media_button.setEnabled(False)
+            self.parent.media_buttons.select_media_button.setEnabled(False)
             self.isMediaImage = False
             self.isMediaVideo = True
             # Start streaming from the selected source

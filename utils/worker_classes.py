@@ -1,7 +1,5 @@
 import numpy as np
 from PySide6.QtCore import Signal, QObject
-from utils import execute_sr
-import gc
 
 class Worker(QObject):
     finished = Signal()
